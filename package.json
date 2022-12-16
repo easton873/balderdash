@@ -1,0 +1,24 @@
+{
+  "name": "balderdashapp",
+  "version": "1.0.0",
+  "description": "a simple app for playing balderdash with friends",
+  "main": "index.js",
+  "scripts": {
+    "test": "tsc test/test.ts && mocha test/test.js",
+    "start": "tsc server/server.ts && node server/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "balderdash"
+  },
+  "author": "Easton Gibson",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mocha": "^10.2.0",
+    "socket.io": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.1"
+  }
+}
