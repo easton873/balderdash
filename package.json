@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "npx tsc test/test.ts && mocha test/test.js",
-    "start": "npx tsc server/server.ts && node server/server.js"
+    "play": "node server/server.js",
+    "start": "tsc server/server.ts && node server/server.js"
   },
   "repository": {
     "type": "git",
