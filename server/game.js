@@ -54,6 +54,7 @@ var ClientHander = /** @class */ (function () {
             // }
         }
         function handlDisconnect() {
+            console.log('client disconnected');
             // create a way for the player to reconnect to themselves
             // delete game.players[client.id];
             // delete game.stocks[client.id];

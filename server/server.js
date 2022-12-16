@@ -12,9 +12,9 @@ var path = require('path');
 var game_1 = require("./game");
 var handleClientActions = require('./game').handleClientActions;
 var PORT = process.env.PORT || 8080;
-app.use(express.static(path.resolve('./front end')));
+app.use(express.static(path.resolve('./balderdash-app/build/')));
 app.get('/', function (req, res) {
-    res.sendFile(path.resolve('./front end/index.html'));
+    res.sendFile(path.resolve('./balderdash-app/build/index.html'));
 });
 server.listen(PORT, function () {
     console.log("Up and at 'em");
@@ -25,7 +25,5 @@ server.listen(PORT, function () {
 //     }
 // });
 io.on('connection', function (client) {
-    console.log(typeof client);
-    console.log(typeof io);
     game_1.clientHandler.handleClientActions(client, io);
 });

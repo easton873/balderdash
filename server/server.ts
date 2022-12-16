@@ -14,10 +14,10 @@ const { handleClientActions } = require('./game');
 
 const PORT = process.env.PORT || 8080;
 
-app.use( express.static(path.resolve('./front end')));
+app.use( express.static(path.resolve('./balderdash-app/build/')));
 
 app.get('/', function(req, res) {
-    res.sendFile(path.resolve('./front end/index.html'));
+    res.sendFile(path.resolve('./balderdash-app/build/index.html'));
 });
 
 server.listen(PORT, ()=>{
@@ -31,7 +31,5 @@ server.listen(PORT, ()=>{
 // });
 
 io.on('connection', client => {
-    console.log(typeof client);
-    console.log(typeof io);
     clientHandler.handleClientActions(client, io);
 });
