@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SCORE_STATE_NAME = exports.GUESSING_STATE_NAME = exports.READING_STATE_NAME = exports.WRITING_STATE_NAME = exports.WAITING_STATE_NAME = exports.SCORE_STATE = exports.GUESSING_STATE = exports.READING_STATE = exports.WRITING_STATE = exports.WAITING_STATE = void 0;
+exports.WAITING_STATE = 0;
+exports.WRITING_STATE = 1;
+exports.READING_STATE = 2;
+exports.GUESSING_STATE = 3;
+exports.SCORE_STATE = 4;
+exports.WAITING_STATE_NAME = "waiting";
+exports.WRITING_STATE_NAME = "writing";
+exports.READING_STATE_NAME = "reading";
+exports.GUESSING_STATE_NAME = "guessing";
+exports.SCORE_STATE_NAME = "score";

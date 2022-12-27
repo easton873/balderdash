@@ -4,9 +4,9 @@
   "description": "a simple app for playing balderdash with friends",
   "main": "index.js",
   "scripts": {
-    "test": "npx tsc test/test.ts && mocha test/test.js",
-    "play": "node server/server.js",
-    "start": "tsc server/server.ts && node server/server.js"
+    "test": "cd test && tsc && mocha test.js && cd ..",
+    "play": "node out/server.js",
+    "start": "node out/server.js"
   },
   "repository": {
     "type": "git",

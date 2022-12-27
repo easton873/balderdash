@@ -8,9 +8,9 @@ const io = require('socket.io')(server, {
         }
     });
 
-var path = require('path');
-import { clientHandler } from "./game";
-const { handleClientActions } = require('./game');
+const path = require('path');
+
+import { clientHandler } from "./game.js";
 
 const PORT = process.env.PORT || 8080;
 

@@ -1,16 +1,15 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var express = require('express');
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server, {
     cors: {
-        origin: '*'
+        origin: '*',
     }
 });
 var path = require('path');
-var game_1 = require("./game");
-var handleClientActions = require('./game').handleClientActions;
+var game_js_1 = require("./game.js");
 var PORT = process.env.PORT || 8080;
 app.use(express.static(path.resolve('./balderdash-app/build/')));
 app.get('/', function (req, res) {
@@ -25,5 +24,5 @@ server.listen(PORT, function () {
 //     }
 // });
 io.on('connection', function (client) {
-    game_1.clientHandler.handleClientActions(client, io);
+    game_js_1.clientHandler.handleClientActions(client, io);
 });
