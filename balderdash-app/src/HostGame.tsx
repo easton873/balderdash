@@ -1,15 +1,15 @@
 import React from 'react'
-import { NavProps } from './Props'
+import { Props } from './Props'
+import { Socket } from './Socket'
 
-export const HostGame: React.FC<NavProps> = ({socket, navFunc}) => {
+export const HostGame: React.FC<Props> = ({navFunc}) => {
     const hostGame = () => {
         console.log('hosting on front');
-        socket.emit('hostGame');
+        Socket.instance.socket.emit('hostGame');
     }
   return (
     <div className='child'>
         <p>Welcome to Balderdash</p>
-        <br/>
         <button onClick={hostGame}>Host Game</button>
         <br/>
         <button onClick={navFunc}>Back</button>

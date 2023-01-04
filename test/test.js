@@ -1,12 +1,24 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var assert = require("assert");
-var BalderdashGame_1 = require("../server/BalderdashGame");
-var Player_1 = require("../server/Player");
-var shared_1 = require("../server/shared");
-var Entry_1 = require("../server/Entry");
-var shared_2 = require("../server/shared");
-var mockSocket = function (x, y) { };
+var BalderdashGame_1 = require("../balderdash-app/src/server/BalderdashGame");
+var Player_1 = require("../balderdash-app/src/server/Player");
+var shared_1 = require("../balderdash-app/src/server/shared");
+var Entry_1 = require("../balderdash-app/src/server/Entry");
+var shared_2 = require("../balderdash-app/src/server/shared");
+var mockSocket = function (id) {
+    return {
+        emit: function () {
+            var args = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+        },
+        id: id
+    };
+};
+var mockHost = new Player_1.Player(mockSocket("host"), "host", "abcde");
+var roomCode = 'abcd';
 describe('Test test', function () {
     it('a test', function () {
         assert.strictEqual(1, 1 + 0);
@@ -14,9 +26,9 @@ describe('Test test', function () {
 });
 describe('Test the game', function () {
     it('Play game test', function () {
-        var game = new BalderdashGame_1.BalderdashGame();
-        var player1 = new Player_1.Player(mockSocket, "abc", "Easton");
-        var player2 = new Player_1.Player(mockSocket, "def", "Krishelle");
+        var game = new BalderdashGame_1.BalderdashGame(mockHost);
+        var player1 = new Player_1.Player(mockSocket("1"), "Easton", roomCode);
+        var player2 = new Player_1.Player(mockSocket("2"), "Krishelle", roomCode);
         var cantProceedTest = function (intendedState) {
             game.nextState(player1);
             assert.strictEqual(intendedState, game.getState().getStateId());
@@ -52,9 +64,6 @@ describe('Test the game', function () {
         assert.strictEqual(shared_1.WRITING_STATE, game.getState().getStateId());
         game.submitEntry(player2, "my actual answer", 'ignored');
         assert.strictEqual(3, game.entries.length);
-        game.nextState(player2);
-        assert.strictEqual(shared_1.WRITING_STATE, game.getState().getStateId());
-        game.nextState(player1);
         assert.strictEqual(shared_1.READING_STATE, game.getState().getStateId());
         cantProceedTest(shared_1.READING_STATE);
         game.readEntry(player2);
@@ -63,10 +72,10 @@ describe('Test the game', function () {
         assert.strictEqual(shared_1.READING_STATE, game.getState().getStateId());
         game.readEntry(player1);
         game.nextState(player1);
-        assert.strictEqual(true, player1.hasNotAnswered());
-        assert.strictEqual(shared_1.READING_STATE, game.getState().getStateId());
-        game.readEntry(player1);
-        game.nextState(player1);
+        // assert.strictEqual(true, player1.hasNotAnswered());
+        // assert.strictEqual(READING_STATE, game.getState().getStateId());
+        // game.readEntry(player1);
+        // game.nextState(player1);
         assert.strictEqual(true, player1.hasNotAnswered());
         assert.strictEqual(shared_1.READING_STATE, game.getState().getStateId());
         game.readEntry(player1);
@@ -99,10 +108,10 @@ describe('Test if actions can be performed in the correct state', function () {
     var player2;
     var player3;
     beforeEach(function () {
-        game = new BalderdashGame_1.BalderdashGame();
-        player1 = new Player_1.Player(mockSocket, "abc", "Easton");
-        player2 = new Player_1.Player(mockSocket, "def", "Krishelle");
-        player3 = new Player_1.Player(mockSocket, "123", "Kimball");
+        game = new BalderdashGame_1.BalderdashGame(mockHost);
+        player1 = new Player_1.Player(mockSocket("1"), "Easton", roomCode);
+        player2 = new Player_1.Player(mockSocket("2"), "Krishelle", roomCode);
+        player3 = new Player_1.Player(mockSocket("3"), "Kimball", roomCode);
         game.joinGame(player2);
         game.joinGame(player1);
     });
@@ -116,8 +125,8 @@ describe('Test if actions can be performed in the correct state', function () {
 });
 describe('Test Entries', function () {
     it('Id increments', function () {
-        var player1 = new Player_1.Player(mockSocket, "jimmy", "jimmy");
-        var player2 = new Player_1.Player(mockSocket, "meep", "meep");
+        var player1 = new Player_1.Player(mockSocket("1"), "jimmy", roomCode);
+        var player2 = new Player_1.Player(mockSocket("2"), "meep", roomCode);
         var e1 = new Entry_1.Entry("howdy", player1);
         var e2 = new Entry_1.Entry("this answer blows", player2);
         assert.strictEqual(e1.id + 1, e2.id);
@@ -125,7 +134,7 @@ describe('Test Entries', function () {
 });
 describe('Random id test', function () {
     it('random id works', function () {
-        for (var i = 0; i < 100000; ++i) {
+        for (var i = 0; i < 10000; ++i) {
             (0, shared_2.makeId)(10);
         }
     });

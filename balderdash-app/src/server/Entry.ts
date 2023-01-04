@@ -1,3 +1,4 @@
+import { FEEntry } from "./BalderdashGame.js";
 import { Player } from "./Player.js";
 
 
@@ -29,5 +30,15 @@ export class Entry {
     }
     public get id() : number {
         return this._id;
+    }
+    public convertToFEData() : FEEntry {
+        const voters : string[] = [];
+        for (let i = 0; i < this.peopleVotingFor.length; ++i){
+            voters.push(this.peopleVotingFor[i].name);
+        }
+        return new FEEntry(this.correct ? 'Correct' : this.creator.name, voters);
+    }
+    public isCreator(p : Player) : boolean {
+        return p === this.creator;
     }
 }

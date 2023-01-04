@@ -6,7 +6,7 @@
   "scripts": {
     "test": "cd test && tsc && mocha test.js && cd ..",
     "play": "node out/server.js",
-    "start": "node out/server.js"
+    "start": "tsc && node out/server.js"
   },
   "repository": {
     "type": "git",

@@ -3,9 +3,9 @@
         "target" : "es5",
         // "module" : "es2015",
         "outDir" : "./out",
-        "rootDir" : "./server",
+        "rootDir" : "./balderdash-app/src/server/",
         //"exclude" : ["balderdash-app"],
         "downlevelIteration": true
     },
-    "include" : ["./server/*"]
+    "include" : ["./balderdash-app/src/server/*"]
 }

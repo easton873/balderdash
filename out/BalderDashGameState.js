@@ -40,6 +40,9 @@ var BalderdashGameStateProxy = /** @class */ (function (_super) {
     BalderdashGameStateProxy.prototype.getStateId = function () {
         return this.state.getStateId();
     };
+    BalderdashGameStateProxy.prototype.getState = function () {
+        return this.state;
+    };
     BalderdashGameStateProxy.prototype.setState = function (state) {
         this.state = state;
     };
@@ -57,6 +60,7 @@ var BalderdashGameStateProxy = /** @class */ (function (_super) {
         if (player.hasNotAnswered() && this.getStateId() == intendedState) {
             if (this.state.readOrReceiveOrVote(instance, player, intendedState)) {
                 player.answer();
+                instance.emitState();
                 return true;
             }
         }
@@ -119,8 +123,8 @@ var BalderdashWritingState = /** @class */ (function () {
         instance.addPlayer(player);
         return true;
     };
-    BalderdashWritingState.prototype.toNextState = function (instance, player) {
-        instance.setState(new BalderdashReadingState());
+    BalderdashWritingState.prototype.toNextState = function (instance, _) {
+        instance.setState(new BalderdashReadingState(instance));
     };
     BalderdashWritingState.prototype.readOrReceiveOrVote = function (instance, player, intendedState) {
         this.numSubmitted++;
@@ -132,9 +136,10 @@ var BalderdashWritingState = /** @class */ (function () {
     return BalderdashWritingState;
 }());
 var BalderdashReadingState = /** @class */ (function () {
-    function BalderdashReadingState(numRead) {
-        if (numRead === void 0) { numRead = 0; }
+    function BalderdashReadingState(instance, numRead) {
+        if (numRead === void 0) { numRead = 1; }
         this.numRead = numRead;
+        instance.emitToMainScreen();
     }
     BalderdashReadingState.prototype.getStateName = function () {
         return shared_js_1.READING_STATE_NAME;
@@ -145,12 +150,12 @@ var BalderdashReadingState = /** @class */ (function () {
     BalderdashReadingState.prototype.nextStateReady = function (instance) {
         // Plus one because the player whose turn it is gets to
         // write one and also the correct one
-        return this.numRead == instance.getNumPlayers() + 1;
+        return this.numRead >= instance.getNumPlayers() + 1;
     };
     BalderdashReadingState.prototype.playerJoin = function (instance, player) {
         throw new Error("Method not implemented.");
     };
-    BalderdashReadingState.prototype.toNextState = function (instance, player) {
+    BalderdashReadingState.prototype.toNextState = function (instance, _) {
         instance.setState(new BalderDashGuessingState());
     };
     BalderdashReadingState.prototype.readOrReceiveOrVote = function (instance, player, intendedState) {
@@ -176,12 +181,12 @@ var BalderDashGuessingState = /** @class */ (function () {
     BalderDashGuessingState.prototype.nextStateReady = function (instance) {
         // one less than num players because the player whose turn
         // it is doesn't vote
-        return this.numGuessed == instance.getNumPlayers() - 1;
+        return this.numGuessed === instance.getNumPlayers() - 1;
     };
     BalderDashGuessingState.prototype.playerJoin = function (instance, player) {
         throw new Error("Method not implemented.");
     };
-    BalderDashGuessingState.prototype.toNextState = function (instance, player) {
+    BalderDashGuessingState.prototype.toNextState = function (instance, _) {
         instance.setState(new BalderdashViewScoresState(instance));
     };
     BalderDashGuessingState.prototype.readOrReceiveOrVote = function (instance, player, intendedState) {
@@ -209,7 +214,7 @@ var BalderdashViewScoresState = /** @class */ (function () {
     BalderdashViewScoresState.prototype.playerJoin = function (instance, player) {
         throw new Error("Method not implemented.");
     };
-    BalderdashViewScoresState.prototype.toNextState = function (instance, player) {
+    BalderdashViewScoresState.prototype.toNextState = function (instance, _) {
         instance.setState(new BalderdashWritingState());
         instance.nextPlayersTurn();
     };

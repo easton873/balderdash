@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var game_1 = require("./game");
 var express = require('express');
 var app = express();
 var server = require('http').Server(app);
@@ -9,7 +10,6 @@ var io = require('socket.io')(server, {
     }
 });
 var path = require('path');
-var game_js_1 = require("./game.js");
 var PORT = process.env.PORT || 8080;
 app.use(express.static(path.resolve('./balderdash-app/build/')));
 app.get('/', function (req, res) {
@@ -24,5 +24,5 @@ server.listen(PORT, function () {
 //     }
 // });
 io.on('connection', function (client) {
-    game_js_1.clientHandler.handleClientActions(client, io);
+    game_1.clientHandler.handleClientActions(client, io);
 });

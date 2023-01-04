@@ -4,6 +4,21 @@ import { makeId } from "./shared.js";
 
 const games : Map<string, BalderdashGame> = new Map<string, BalderdashGame>();
 const roomLookup : Map<string, BalderdashGame> = new Map<string, BalderdashGame>();
+const hosts : Map<string, Player> = new Map<string, Player>();
+
+const confirmGame = (g : BalderdashGame | undefined) : BalderdashGame => {
+    if (g){
+        return g;
+    }
+    throw Error("Game is undefined");
+}
+
+const queryGame = (g : BalderdashGame | undefined) : BalderdashGame | null => {
+    if (g){
+        return g;
+    }
+    return null;
+}
 
 class ClientHander {
     handleClientActions(client: any, io: any){
@@ -14,8 +29,8 @@ class ClientHander {
         client.on('vote', handleVote);
         client.on('submit', handleSubmitEntry);
         client.on('next', handleNext);
-
-        const game : BalderdashGame = roomLookup.get(client.id);
+        client.on('readNext', handleReadNext);
+        client.on('readPrev', handleReadPrev);
     
         // function getCurrGame(){
         //     let room = roomLookup[client.id];
@@ -26,25 +41,51 @@ class ClientHander {
         //     return getCurrGame().players[client.id];
         // }
     
-        function emitGameState(roomName, gameInstance) {
-            console.log(roomName);
-            io.sockets.in(roomName).
-                emit('gameState', gameInstance);
+        function emitGameState(roomName : string, gameInstance : BalderdashGame) : void {
+            console.log('emitting game to room ' + roomName);
+            gameInstance.emitState();
+            //io.sockets.in(roomName).emit('gameState', gameInstance.exportState(player));
         }
     
         function handleHostGame(){
+            if (hosts.get(client.id)){
+                console.log('already hosting');
+                return;
+            }
             const room = makeId(4);
             console.log(room);
-            games.set(room, new BalderdashGame());
+            const host : Player = new Player(client, "Host", room);
+            const game : BalderdashGame = new BalderdashGame(host);
+            games.set(room, game);
+            hosts.set(client.id, host);
+            client.emit("hosting", room);
+            game.emitState();
+        }
+
+        function handleReadNext(){
+            const game : BalderdashGame = confirmGame(roomLookup.get(client.id));
+            game.readEntry(game.getPlayer(client.id));
+            game.emitToMainScreen();
+        }
+
+        function handleReadPrev(){
+
         }
     
         function handleJoinGame(roomCode : string, gamerTag : string){
+            roomCode = roomCode.toLowerCase();
             console.log("Client's id: " + client.id);
-            const game : BalderdashGame = games.get(roomCode);
+            const game : BalderdashGame | null = queryGame(games.get(roomCode));
+            if (roomLookup.get(client.id)){
+                console.log('already in a game');
+                return;
+            }
             if (game){
-                if (game.joinGame(new Player(client.emit, client.id, gamerTag))){
+                const player : Player = new Player(client, gamerTag, roomCode);
+                if (game.joinGame(player)){
                     client.join(roomCode);
                     roomLookup.set(client.id, game);
+                    emitGameState(roomCode, game);
                 }
                 // roomLookup[client.id] = room;
                 // game.players[client.id] = createNewPlayer(name, color, client.id);
@@ -80,15 +121,21 @@ class ClientHander {
             //emitGameState(0, game);
         }
 
-        function handleVote(voteId : number) : void {
-            game.voteFor(game.getPlayer(client.id), voteId);
+        function handleVote() : void {
+            const game : BalderdashGame = confirmGame(roomLookup.get(client.id));
+            game.voteForCurrent(game.getPlayer(client.id));
         }
 
         function handleSubmitEntry(entryText : string, correctAnswer : string = "") : void {
+            console.log("submitting");
+            const game : BalderdashGame = confirmGame(roomLookup.get(client.id));
             game.submitEntry(game.getPlayer(client.id), entryText, correctAnswer);
+            client.emit('success');
         }
 
         function handleNext() : void {
+            console.log('next');
+            const game : BalderdashGame = confirmGame(roomLookup.get(client.id));
             game.nextState(game.getPlayer(client.id));
         }
     }

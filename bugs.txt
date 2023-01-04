@@ -1,0 +1,16 @@
+room code needs to be real words
+
+Remember people when they crash
+
+~It should be more obvious when its your turn
+~How many more people to submit on screen should be shown during writing phase
+~Empty submissions should not be allowed
+~Displays wrong number of people for waiting on writing
+
+~Reading needs one to many clicks to progress
+
+Don't move on from voting until we've seen all answers and all people have voted
+
+Score display should display the correct one
+Phones should see the full answers -maybe-
+~Main screen should display what is being displayed on phones

@@ -25,6 +25,9 @@ export class BalderdashGameStateProxy extends BalderdashGameState {
     public getStateId(): BalderdashState {
         return this.state.getStateId();
     }
+    public getState() : BalderdashGameState {
+        return this.state;
+    }
     public setState(state : BalderdashGameState){
         this.state = state;
     }
@@ -42,6 +45,7 @@ export class BalderdashGameStateProxy extends BalderdashGameState {
         if (player.hasNotAnswered() && this.getStateId() == intendedState){
             if (this.state.readOrReceiveOrVote(instance, player, intendedState)){
                 player.answer();
+                instance.emitState();
                 return true;
             }
         }
@@ -101,8 +105,8 @@ class BalderdashWritingState implements BalderdashGameState {
         instance.addPlayer(player);
         return true;
     }
-    toNextState(instance : BalderdashGame, player : Player): void {
-        instance.setState(new BalderdashReadingState());
+    toNextState(instance : BalderdashGame, _ : Player): void {
+        instance.setState(new BalderdashReadingState(instance));
     }
     readOrReceiveOrVote(instance : BalderdashGame, player : Player, intendedState : BalderdashState): boolean {
         this.numSubmitted++;
@@ -115,7 +119,9 @@ class BalderdashWritingState implements BalderdashGameState {
 }
 
 class BalderdashReadingState implements BalderdashGameState {
-    constructor(private numRead : number = 0){}
+    constructor(instance : BalderdashGame, private numRead : number = 1){
+        instance.emitToMainScreen();
+    }
     getStateName(): string {
         return READING_STATE_NAME;
     }
@@ -125,12 +131,12 @@ class BalderdashReadingState implements BalderdashGameState {
     nextStateReady(instance: BalderdashGame): boolean {
         // Plus one because the player whose turn it is gets to
         // write one and also the correct one
-        return this.numRead == instance.getNumPlayers() + 1;
+        return this.numRead >= instance.getNumPlayers() + 1;
     }
     playerJoin(instance: BalderdashGame, player: Player): boolean {
         throw new Error("Method not implemented.");
     }
-    toNextState(instance : BalderdashGame, player : Player): void {
+    toNextState(instance : BalderdashGame, _ : Player): void {
         instance.setState(new BalderDashGuessingState());
     }
     readOrReceiveOrVote(instance : BalderdashGame, player : Player, intendedState : BalderdashState): boolean {
@@ -153,12 +159,12 @@ class BalderDashGuessingState implements BalderdashGameState {
     nextStateReady(instance: BalderdashGame): boolean {
         // one less than num players because the player whose turn
         // it is doesn't vote
-        return this.numGuessed == instance.getNumPlayers() - 1;
+        return this.numGuessed === instance.getNumPlayers() - 1;
     }
     playerJoin(instance: BalderdashGame, player: Player): boolean {
         throw new Error("Method not implemented.");
     }
-    toNextState(instance : BalderdashGame, player : Player): void {
+    toNextState(instance : BalderdashGame, _ : Player): void {
         instance.setState(new BalderdashViewScoresState(instance));
     }
     readOrReceiveOrVote(instance : BalderdashGame, player : Player, intendedState : BalderdashState): boolean {
@@ -186,7 +192,7 @@ class BalderdashViewScoresState implements BalderdashGameState {
     playerJoin(instance: BalderdashGame, player: Player): boolean {
         throw new Error("Method not implemented.");
     }
-    toNextState(instance: BalderdashGame, player: Player): void {
+    toNextState(instance: BalderdashGame, _: Player): void {
         instance.setState(new BalderdashWritingState());
         instance.nextPlayersTurn();
     }

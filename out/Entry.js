@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Entry = void 0;
+var BalderdashGame_js_1 = require("./BalderdashGame.js");
 var Entry = /** @class */ (function () {
     function Entry(_content, creator, _correct, peopleVotingFor) {
         if (_correct === void 0) { _correct = false; }
@@ -46,6 +47,16 @@ var Entry = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
+    Entry.prototype.convertToFEData = function () {
+        var voters = [];
+        for (var i = 0; i < this.peopleVotingFor.length; ++i) {
+            voters.push(this.peopleVotingFor[i].name);
+        }
+        return new BalderdashGame_js_1.FEEntry(this.correct ? 'Correct' : this.creator.name, voters);
+    };
+    Entry.prototype.isCreator = function (p) {
+        return p === this.creator;
+    };
     Entry.idNum = 0;
     return Entry;
 }());

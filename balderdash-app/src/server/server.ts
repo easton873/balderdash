@@ -1,3 +1,5 @@
+import { clientHandler } from "./game";
+
 const express = require('express');
 const app = express();
 
@@ -10,13 +12,11 @@ const io = require('socket.io')(server, {
 
 const path = require('path');
 
-import { clientHandler } from "./game.js";
-
 const PORT = process.env.PORT || 8080;
 
 app.use( express.static(path.resolve('./balderdash-app/build/')));
 
-app.get('/', function(req, res) {
+app.get('/', function(req : any, res : any) {
     res.sendFile(path.resolve('./balderdash-app/build/index.html'));
 });
 
@@ -30,6 +30,6 @@ server.listen(PORT, ()=>{
 //     }
 // });
 
-io.on('connection', client => {
+io.on('connection', (client : any) => {
     clientHandler.handleClientActions(client, io);
 });

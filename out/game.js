@@ -1,9 +1,24 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.clientHandler = void 0;
+var BalderdashGame_js_1 = require("./BalderdashGame.js");
 var Player_js_1 = require("./Player.js");
+var shared_js_1 = require("./shared.js");
 var games = new Map();
 var roomLookup = new Map();
+var hosts = new Map();
+var confirmGame = function (g) {
+    if (g) {
+        return g;
+    }
+    throw Error("Game is undefined");
+};
+var queryGame = function (g) {
+    if (g) {
+        return g;
+    }
+    return null;
+};
 var ClientHander = /** @class */ (function () {
     function ClientHander() {
     }
@@ -15,7 +30,8 @@ var ClientHander = /** @class */ (function () {
         client.on('vote', handleVote);
         client.on('submit', handleSubmitEntry);
         client.on('next', handleNext);
-        var game = roomLookup.get(client.id);
+        client.on('readNext', handleReadNext);
+        client.on('readPrev', handleReadPrev);
         // function getCurrGame(){
         //     let room = roomLookup[client.id];
         //     return games[room];
@@ -24,24 +40,45 @@ var ClientHander = /** @class */ (function () {
         //     return getCurrGame().players[client.id];
         // }
         function emitGameState(roomName, gameInstance) {
-            console.log(roomName);
-            io.sockets.in(roomName).
-                emit('gameState', gameInstance);
+            console.log('emitting game to room ' + roomName);
+            gameInstance.emitState();
+            //io.sockets.in(roomName).emit('gameState', gameInstance.exportState(player));
         }
         function handleHostGame() {
-            // room = makeid(4);
-            // console.log(room);
-            // games[room] = createGame();
-            // // saves the room joined in handleJoinGame();
-            // handleJoinGame(color, name, room);
+            if (hosts.get(client.id)) {
+                console.log('already hosting');
+                return;
+            }
+            var room = (0, shared_js_1.makeId)(4);
+            console.log(room);
+            var host = new Player_js_1.Player(client, "Host", room);
+            var game = new BalderdashGame_js_1.BalderdashGame(host);
+            games.set(room, game);
+            hosts.set(client.id, host);
+            client.emit("hosting", room);
+            game.emitState();
+        }
+        function handleReadNext() {
+            var game = confirmGame(roomLookup.get(client.id));
+            game.readEntry(game.getPlayer(client.id));
+            game.emitToMainScreen();
+        }
+        function handleReadPrev() {
         }
         function handleJoinGame(roomCode, gamerTag) {
+            roomCode = roomCode.toLowerCase();
             console.log("Client's id: " + client.id);
-            var game = games.get(roomCode);
+            var game = queryGame(games.get(roomCode));
+            if (roomLookup.get(client.id)) {
+                console.log('already in a game');
+                return;
+            }
             if (game) {
-                if (game.joinGame(new Player_js_1.Player(client.emit, client.id, gamerTag))) {
+                var player = new Player_js_1.Player(client, gamerTag, roomCode);
+                if (game.joinGame(player)) {
                     client.join(roomCode);
                     roomLookup.set(client.id, game);
+                    emitGameState(roomCode, game);
                 }
                 // roomLookup[client.id] = room;
                 // game.players[client.id] = createNewPlayer(name, color, client.id);
@@ -73,14 +110,20 @@ var ClientHander = /** @class */ (function () {
             // }
             //emitGameState(0, game);
         }
-        function handleVote(voteId) {
-            game.voteFor(game.getPlayer(client.id), voteId);
+        function handleVote() {
+            var game = confirmGame(roomLookup.get(client.id));
+            game.voteForCurrent(game.getPlayer(client.id));
         }
         function handleSubmitEntry(entryText, correctAnswer) {
             if (correctAnswer === void 0) { correctAnswer = ""; }
+            console.log("submitting");
+            var game = confirmGame(roomLookup.get(client.id));
             game.submitEntry(game.getPlayer(client.id), entryText, correctAnswer);
+            client.emit('success');
         }
         function handleNext() {
+            console.log('next');
+            var game = confirmGame(roomLookup.get(client.id));
             game.nextState(game.getPlayer(client.id));
         }
     };

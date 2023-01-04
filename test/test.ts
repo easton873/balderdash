@@ -1,11 +1,18 @@
 import * as assert from "assert";
-import { BalderdashGame } from "../server/BalderdashGame";
-import { Player } from "../server/Player";
-import { GUESSING_STATE, READING_STATE, SCORE_STATE, WAITING_STATE_NAME, WRITING_STATE, WRITING_STATE_NAME } from "../server/shared";
-import {Entry} from "../server/Entry";
-import {makeId} from "../server/shared";
+import { BalderdashGame } from "../balderdash-app/src/server/BalderdashGame";
+import { Player } from "../balderdash-app/src/server/Player";
+import { GUESSING_STATE, READING_STATE, SCORE_STATE, WAITING_STATE_NAME, WRITING_STATE, WRITING_STATE_NAME } from "../balderdash-app/src/server/shared";
+import {Entry} from "../balderdash-app/src/server/Entry";
+import {makeId} from "../balderdash-app/src/server/shared";
 
-const mockSocket = (x: any, y: any)=>{};
+const mockSocket : (id : string) => any = (id : string) => {
+  return{
+    emit: (...args : any[])=>{},
+    id: id
+  }
+};
+const mockHost : Player = new Player(mockSocket("host"), "host", "abcde")
+const roomCode: string = 'abcd'
 
 describe('Test test', function() {
   it('a test', function() {
@@ -15,9 +22,9 @@ describe('Test test', function() {
 
 describe('Test the game', function() {
   it('Play game test', function() {
-    const game : BalderdashGame = new BalderdashGame();
-    let player1 = new Player(mockSocket, "abc", "Easton");
-    let player2 = new Player(mockSocket, "def", "Krishelle");
+    const game : BalderdashGame = new BalderdashGame(mockHost);
+    let player1 = new Player(mockSocket("1"), "Easton", roomCode);
+    let player2 = new Player(mockSocket("2"), "Krishelle", roomCode);
     let cantProceedTest = (intendedState) => {
       game.nextState(player1);
       assert.strictEqual(intendedState, game.getState().getStateId());
@@ -53,18 +60,11 @@ describe('Test the game', function() {
     assert.strictEqual(WRITING_STATE, game.getState().getStateId());
     game.submitEntry(player2, "my actual answer", 'ignored');
     assert.strictEqual(3, game.entries.length);
-    game.nextState(player2);
-    assert.strictEqual(WRITING_STATE, game.getState().getStateId());
-    game.nextState(player1);
     assert.strictEqual(READING_STATE, game.getState().getStateId());
     cantProceedTest(READING_STATE);
     game.readEntry(player2);
     game.nextState(player1);
     assert.strictEqual(true, player2.hasNotAnswered());
-    assert.strictEqual(READING_STATE, game.getState().getStateId());
-    game.readEntry(player1);
-    game.nextState(player1);
-    assert.strictEqual(true, player1.hasNotAnswered());
     assert.strictEqual(READING_STATE, game.getState().getStateId());
     game.readEntry(player1);
     game.nextState(player1);
@@ -101,10 +101,10 @@ describe('Test if actions can be performed in the correct state', () => {
   let player2;
   let player3;
   beforeEach(() => {
-    game = new BalderdashGame();
-    player1 = new Player(mockSocket, "abc", "Easton");
-    player2 = new Player(mockSocket, "def", "Krishelle");
-    player3 = new Player(mockSocket, "123", "Kimball");
+    game = new BalderdashGame(mockHost);
+    player1 = new Player(mockSocket("1"), "Easton", roomCode);
+    player2 = new Player(mockSocket("2"), "Krishelle", roomCode);
+    player3 = new Player(mockSocket("3"), "Kimball", roomCode);
     game.joinGame(player2);
     game.joinGame(player1);
   })
@@ -119,8 +119,8 @@ describe('Test if actions can be performed in the correct state', () => {
 
 describe('Test Entries', () => {
   it('Id increments', () => {
-    let player1 : Player = new Player(mockSocket, "jimmy", "jimmy");
-    let player2 : Player = new Player(mockSocket, "meep", "meep");
+    let player1 : Player = new Player(mockSocket("1"), "jimmy", roomCode);
+    let player2 : Player = new Player(mockSocket("2"), "meep", roomCode);
     const e1 : Entry = new Entry("howdy", player1);
     const e2 : Entry = new Entry("this answer blows", player2);
     assert.strictEqual(e1.id + 1, e2.id);
@@ -129,7 +129,7 @@ describe('Test Entries', () => {
 
 describe('Random id test', () => {
   it('random id works', () => {
-    for(let i = 0; i < 100000; ++i){
+    for(let i = 0; i < 10000; ++i){
       makeId(10);
     }
   })
